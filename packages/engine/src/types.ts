@@ -68,6 +68,7 @@ export type GameEvent =
   | { type: "enroll"; name: string; claimedSeat?: SeatId; speakerId?: string }
   | { type: "start" }
   | { type: "advance" }
+  | { type: "reset" }
   | {
       type: "act";
       intent: ActIntent;

@@ -474,7 +474,7 @@ function act(state: GameState, event: Extract<GameEvent, { type: "act" }>): Redu
         return fail(state, "不能刀自己", "不能刀自己，换一个。");
       }
       state.night.killTarget = event.targetSeat;
-      goNightSeer(state);
+      say(state, "刀口已记下。请闭眼离开。", "狼人行动完毕。");
       return ok(state);
     }
     case "check": {
@@ -488,20 +488,11 @@ function act(state: GameState, event: Extract<GameEvent, { type: "act" }>): Redu
       const isWerewolf = target.role === "werewolf";
       state.night.seerCheck = { target: event.targetSeat, isWerewolf };
       const result = isWerewolf ? "狼人" : "好人";
-      goNightWitch(state);
-      const witch = seatByRole(state, "witch");
-      const diedHint =
-        witch?.alive && state.night.killTarget
-          ? `今晚${seatLabel(state.night.killTarget, seatById(state, state.night.killTarget).name)}被刀了。`
-          : witch?.alive
-            ? "今晚是平安夜。"
-            : "";
-      const privateLine = `查验结果：${seatLabel(event.targetSeat, target.name)}是${result}。请闭眼。${
-        witch?.alive
-          ? `女巫请靠近。${diedHint}${state.night.witchHasSave ? "可救或过。" : ""}`
-          : ""
-      }`;
-      say(state, privateLine, "预言家已查验。女巫行动中。");
+      say(
+        state,
+        `查验结果：${seatLabel(event.targetSeat, target.name)}是${result}。请记住后闭眼离开。`,
+        "预言家已查验。",
+      );
       return ok(state);
     }
     case "witch": {
@@ -580,6 +571,8 @@ export function reduce(state: GameState, event: GameEvent): ReduceResult {
       return start(next);
     case "advance":
       return advance(next);
+    case "reset":
+      return ok(createGame(Date.now() % 1_000_000));
     case "act":
       return act(next, event);
   }

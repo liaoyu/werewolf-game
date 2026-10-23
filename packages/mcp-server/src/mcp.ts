@@ -32,8 +32,9 @@ export function mcpGet(c: Context, publicUrl: string): Response {
   return new Response(stream, {
     headers: {
       "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
+      "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
     },
   });
 }
@@ -101,11 +102,27 @@ export async function handleRpc(
   return response;
 }
 
-export function deviceIdFromHeaders(c: Context, fallback = "local-mac"): string {
-  return (
-    c.req.header("x-linx-device-id") ||
+/** 设备页 / 旁观屏 / MCP 缺省房间键，与 LINX_DEVICE_MAC 缺省值保持一致 */
+export const DEFAULT_DEVICE_ID = "02:10:24:00:00:01";
+
+export function normalizeDeviceId(raw: string | undefined | null): string {
+  const value = (raw ?? "").trim();
+  return (value || DEFAULT_DEVICE_ID).toLowerCase();
+}
+
+export function deviceIdFromHeaders(c: Context, fallback?: string): string {
+  const deviceHeader =
+    c.req.header("Device-Id") ||
+    c.req.header("device-id") ||
     c.req.header("X-Linx-Device-Id") ||
-    c.req.query("deviceId") ||
-    fallback
-  ).toLowerCase();
+    c.req.header("x-linx-device-id");
+  const agentHeader = c.req.header("Agent-Id") || c.req.header("X-Linx-Agent-Id");
+  const sessionHeader = c.req.header("Session-Id") || c.req.header("X-Linx-Session-Id");
+  const id = normalizeDeviceId(
+    deviceHeader || c.req.query("deviceId") || process.env.LINX_DEVICE_MAC || fallback,
+  );
+  console.log(
+    `[mcp] room=${id} Device-Id=${deviceHeader ?? "-"} Agent-Id=${agentHeader ?? "-"} Session-Id=${sessionHeader ?? "-"}`,
+  );
+  return id;
 }
