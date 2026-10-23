@@ -1,0 +1,17 @@
+{
+  "name": "werewolf-game",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "test": "pnpm --filter @werewolf/engine test",
+    "dev": "pnpm --filter @werewolf/mcp-server dev",
+    "dev:observer": "pnpm --filter @werewolf/observer-web dev",
+    "dev:device": "pnpm --filter @werewolf/virtual-device dev",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
