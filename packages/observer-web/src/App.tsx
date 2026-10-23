@@ -16,16 +16,21 @@ const VP: Record<string, string> = {
   low_confidence: "低置信",
 };
 
+const DEFAULT_DEVICE_ID = "02:10:24:00:00:01";
+
+function defaultDeviceId(): string {
+  const q = new URLSearchParams(location.search).get("deviceId");
+  const env = String(import.meta.env.VITE_LINX_DEVICE_MAC ?? "").trim();
+  return q || localStorage.getItem("werewolf-device") || env || DEFAULT_DEVICE_ID;
+}
+
 function wsUrl(deviceId: string): string {
   const proto = location.protocol === "https:" ? "wss" : "ws";
   return `${proto}://${location.host}/observer?deviceId=${encodeURIComponent(deviceId)}`;
 }
 
 export function App() {
-  const [deviceId, setDeviceId] = useState(() => {
-    const q = new URLSearchParams(location.search).get("deviceId");
-    return q || localStorage.getItem("werewolf-device") || "local-mac";
-  });
+  const [deviceId, setDeviceId] = useState(defaultDeviceId);
   const [god, setGod] = useState(true);
   const [snap, setSnap] = useState<Snapshot | null>(null);
   const [alive, setAlive] = useState(false);
@@ -64,7 +69,7 @@ export function App() {
           <input
             value={deviceId}
             onChange={(e) => setDeviceId(e.target.value)}
-            placeholder="Device-Id"
+            placeholder="粘贴设备页 Device-Id"
           />
           <button className={god ? "active" : ""} onClick={() => setGod(true)}>
             上帝
@@ -177,12 +182,17 @@ function TextPlay({ deviceId }: { deviceId: string }) {
         </button>
         <button onClick={() => send({ type: "start" })}>开局</button>
         <button onClick={() => send({ type: "advance" })}>下一阶段</button>
+        <button onClick={() => send({ type: "reset" })}>新开一局</button>
+        <button
+          onClick={() => send({ type: "act", intent: "skip", voiceprintMatched: false })}
+        >
+          模拟抢麦
+        </button>
         <select value={intent} onChange={(e) => setIntent(e.target.value)}>
           <option value="speak">发言</option>
           <option value="vote">投票</option>
           <option value="kill">刀</option>
           <option value="check">查验</option>
-          <option value="witch">女巫过</option>
           <option value="skip">跳过</option>
         </select>
         <input value={target} onChange={(e) => setTarget(e.target.value)} style={{ width: 48 }} />
@@ -195,12 +205,20 @@ function TextPlay({ deviceId }: { deviceId: string }) {
               intent,
               targetSeat: Number(target),
               speech,
-              save: intent === "witch" && speech.includes("救"),
             })
           }
         >
           行动
         </button>
+        <button onClick={() => send({ type: "act", intent: "witch", save: true })}>救</button>
+        <button
+          onClick={() =>
+            send({ type: "act", intent: "witch", targetSeat: Number(target) })
+          }
+        >
+          毒
+        </button>
+        <button onClick={() => send({ type: "act", intent: "witch" })}>过</button>
       </div>
       {msg ? <p style={{ margin: "10px 0 0" }}>{msg}</p> : null}
     </section>

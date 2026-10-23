@@ -41,3 +41,5 @@ LLM 不当裁判。身份、死亡、投票、胜负只由 `packages/engine` 裁
 ## 5. 运行与部署
 
 见仓库根目录 `README.md`。MCP 需公网 HTTPS；设备端用本机浏览器页，经 mcp-server 桥接灵矽 WebSocket（浏览器不能自定义 WS Header）。
+
+房间键：MCP 读 `Device-Id` / `X-Linx-Device-Id`，缺省与设备页、旁观屏共用 `LINX_DEVICE_MAC`（或 `02:10:24:00:00:01`）。夜间一句 TTS 只服务当前被点名座位，阶段切换走 `werewolf_advance`。
