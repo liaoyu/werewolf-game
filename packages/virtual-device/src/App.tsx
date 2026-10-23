@@ -196,7 +196,7 @@ export function App() {
       </div>
       {ota?.activation?.code ? <div className="code">{ota.activation.code}</div> : null}
       <p className="hint">
-        1. 上报 OTA 拿到 6 位激活码 → 2. 智控台绑定到法官智能体 → 3. 检查绑定并连接（会向你要麦克风）→ 4. 旁观屏粘贴同一 Device-Id。
+        1. 上报 OTA 拿到 6 位激活码 → 2. 智控台绑定到法官智能体 → 3. 检查绑定并连接（会向你要麦克风）→ 4. 对着这台电脑说话。旁观屏粘贴同一 Device-Id 只看局，不在 5173 说话。
         隧道 URL 变了要改仓库根 `.env` 的 MCP_PUBLIC_URL 并重启 `pnpm dev`。
       </p>
       <div className="status">{status}</div>
