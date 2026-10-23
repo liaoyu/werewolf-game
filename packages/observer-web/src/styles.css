@@ -55,13 +55,14 @@ button.active { background: var(--amber); color: var(--ink); border-color: var(-
   color: var(--amber);
 }
 .script {
-  margin: 0 0 24px;
+  margin: 0 0 8px;
   padding: 16px 18px;
   background: #241e18;
   border-left: 3px solid var(--amber);
   line-height: 1.7;
   min-height: 3.4em;
 }
+.script + .sub { margin: 0 0 22px; }
 
 .table {
   display: grid;

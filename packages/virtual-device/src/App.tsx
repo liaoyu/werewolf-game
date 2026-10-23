@@ -167,7 +167,7 @@ export function App() {
       <div className="mac">Device-Id {id.deviceId}</div>
       {ota?.activation?.code ? <div className="code">{ota.activation.code}</div> : null}
       <p className="hint">
-        1. 上报 OTA 拿到 6 位激活码 → 2. 智控台绑定到法官智能体 → 3. 检查绑定并连接 → 4. 点开始监听，允许麦克风。
+        1. 上报 OTA 拿到 6 位激活码 → 2. 智控台绑定到法官智能体 → 3. 检查绑定并连接 → 4. 点「开始监听」，允许麦克风后对着这台电脑说话。旁观屏只看局，不在 5173 说话。
       </p>
       <div className="status">{status}</div>
       <div className="row">
