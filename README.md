@@ -1,8 +1,6 @@
 # 灵局 · 灵矽语音狼人杀
 
-几个人围着这台电脑，声纹入座，它就是法官。
-
-七牛 1024 Hackathon 研发赛道 · 灵矽应用 · 语音类游戏（非跑团）。
+七牛 1024 Hackathon 研发赛道 · 灵矽应用 · 语音类游戏。
 
 ## 怎么跑
 
@@ -55,6 +53,3 @@ cloudflared tunnel --url http://127.0.0.1:8787
 AI 过程：[docs/ai-log.md](docs/ai-log.md)  
 Demo：[docs/demo.md](docs/demo.md)
 
-## 开发规范
-
-每一次变更走 Pull Request。10/26 09:00 仓库冻结。

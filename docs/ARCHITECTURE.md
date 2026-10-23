@@ -2,7 +2,6 @@
 
 赛题：七牛 1024 Hackathon 研发赛道 · 灵矽应用 · 语音类游戏（狼人杀）
 
-一句话产品：几个人围着这台电脑，声纹入座，它就是法官。
 
 ## 1. 系统上下文
 
@@ -39,20 +38,6 @@ LLM 不当裁判。身份、死亡、投票、胜负只由 `packages/engine` 裁
 - `privateView(seat)`：仅当前被点名座位的身份与验人结果
 - `godView`：路演评委用，绝不作为 MCP 工具返回给法官模型
 
-## 5. 分工
-
-| 角色 | 模块 | Git 作者 |
-|---|---|---|
-| A 裁判 | engine + 测试 | 见提交记录 |
-| B 灵矽 | mcp-server / virtual-device / voiceprint / linx-agent | 见提交记录 |
-| C 产品 | observer-web / README / 本文档 / demo / ai-log | 见提交记录 |
-
-单人作品时三角色由同一作者兼领，在提交记录中按 PR 划分。
-
-## 6. 运行与部署
+## 5. 运行与部署
 
 见仓库根目录 `README.md`。MCP 需公网 HTTPS；设备端用本机浏览器页，经 mcp-server 桥接灵矽 WebSocket（浏览器不能自定义 WS Header）。
-
-## 7. AI 使用说明
-
-见 [ai-log.md](./ai-log.md)。
