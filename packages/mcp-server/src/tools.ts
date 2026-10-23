@@ -70,6 +70,11 @@ export const TOOLS: ToolDef[] = [
     description: "只返回公开信息：存活、阶段、票型。禁止用它编造死亡或身份。",
     inputSchema: { type: "object", properties: {} },
   },
+  {
+    name: "werewolf_reset",
+    description: "新开一局，清空报名与身份。用户说「新开一局 / 重新开始」时调用。",
+    inputSchema: { type: "object", properties: {} },
+  },
 ];
 
 function asSeat(value: unknown): SeatId | undefined {
@@ -144,6 +149,13 @@ export async function callTool(
         return { text: pack(deviceId), isError: false };
       case "werewolf_advance": {
         const result = applyEvent(deviceId, { type: "advance" });
+        return {
+          text: pack(deviceId, { ok: result.ok, error: result.error }),
+          isError: !result.ok,
+        };
+      }
+      case "werewolf_reset": {
+        const result = applyEvent(deviceId, { type: "reset" });
         return {
           text: pack(deviceId, { ok: result.ok, error: result.error }),
           isError: !result.ok,

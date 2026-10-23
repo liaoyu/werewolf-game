@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@9.15.0",
   "scripts": {
-    "test": "pnpm --filter @werewolf/engine test",
+    "test": "pnpm --filter @werewolf/engine test && pnpm --filter @werewolf/mcp-server test",
     "dev": "pnpm --filter @werewolf/mcp-server dev",
     "dev:observer": "pnpm --filter @werewolf/observer-web dev",
     "dev:device": "pnpm --filter @werewolf/virtual-device dev",

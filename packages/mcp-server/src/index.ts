@@ -8,7 +8,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import type { LinxConfig } from "@werewolf/voiceprint";
 import type { GameEvent } from "@werewolf/engine";
-import { deviceIdFromHeaders, handleRpc, mcpGet } from "./mcp.js";
+import { DEFAULT_DEVICE_ID, deviceIdFromHeaders, handleRpc, mcpGet } from "./mcp.js";
 import { applyEvent, getRoom, listRooms, setLastAudio, snapshot, subscribe } from "./rooms.js";
 import { pollActivate, requestOta } from "./linx.js";
 import { pcmToWav } from "./pcm.js";
@@ -119,7 +119,7 @@ const server = serve({
 const wss = new WebSocketServer({ noServer: true });
 
 function observerHandler(client: WebSocket, url: URL): void {
-  const deviceId = (url.searchParams.get("deviceId") ?? "local-mac").toLowerCase();
+  const deviceId = (url.searchParams.get("deviceId") || process.env.LINX_DEVICE_MAC || DEFAULT_DEVICE_ID).toLowerCase();
   const send = () => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify({ type: "state", ...snapshot(deviceId) }));
@@ -217,7 +217,10 @@ server.on("upgrade", (req: IncomingMessage, socket: Duplex, head: Buffer) => {
   socket.destroy();
 });
 
+const defaultRoom = (process.env.LINX_DEVICE_MAC || DEFAULT_DEVICE_ID).toLowerCase();
 console.log(`werewolf mcp-server http://127.0.0.1:${PORT}`);
 console.log(`MCP SSE: ${PUBLIC_URL}/mcp`);
+console.log(`default room: ${defaultRoom}`);
 console.log(`observer: ws://127.0.0.1:${PORT}/observer?deviceId=`);
 console.log(`device bridge: ws://127.0.0.1:${PORT}/linx/device`);
+console.log(`隧道 URL 变了要改 .env 的 MCP_PUBLIC_URL 并重启 pnpm dev`);

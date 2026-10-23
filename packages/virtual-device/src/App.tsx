@@ -19,6 +19,7 @@ export function App() {
   const procRef = useRef<ScriptProcessorNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const leftover = useRef<Float32Array>(new Float32Array(0));
+  const listeningRef = useRef(false);
 
   const append = (line: string) => {
     setLog((prev) => [...prev.slice(-200), `${new Date().toLocaleTimeString()} ${line}`]);
@@ -69,6 +70,14 @@ export function App() {
       return;
     }
     await ensureAudio().resume();
+    try {
+      streamRef.current = await navigator.mediaDevices.getUserMedia({
+        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
+      });
+      append("已拿到麦克风，接通后自动监听。");
+    } catch (err) {
+      append(`未拿到麦克风，接通后请点开始监听：${String(err)}`);
+    }
     const wsUrl = ota.websocket?.url ?? "wss://xrobo-io.qiniuapi.com/v1/ws/";
     const proto = location.protocol === "https:" ? "wss" : "ws";
     const bridge = `${proto}://${location.host}/linx/device?deviceId=${encodeURIComponent(id.deviceId)}&clientId=${encodeURIComponent(id.clientId)}&token=${encodeURIComponent(token)}&wsUrl=${encodeURIComponent(wsUrl)}`;
@@ -87,6 +96,9 @@ export function App() {
             ws.send(JSON.stringify(PCM_HELLO));
             append("已发送 hello (PCM 16k)。");
             setStatus("可对话");
+            void startListen().catch((err) => {
+              append(`自动开麦失败，请点开始监听：${String(err)}`);
+            });
           }
         } catch {
           /* text log */
@@ -109,13 +121,15 @@ export function App() {
       append("请先连接。");
       return;
     }
+    if (listeningRef.current) return;
     const ctx = ensureAudio();
     await ctx.resume();
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
-    });
-    streamRef.current = stream;
-    const source = ctx.createMediaStreamSource(stream);
+    if (!streamRef.current) {
+      streamRef.current = await navigator.mediaDevices.getUserMedia({
+        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
+      });
+    }
+    const source = ctx.createMediaStreamSource(streamRef.current);
     const proc = ctx.createScriptProcessor(4096, 1, 1);
     proc.onaudioprocess = (event) => {
       if (!listeningRef.current) return;
@@ -150,13 +164,12 @@ export function App() {
     append("开始监听（realtime）。请靠近电脑说话。");
   }
 
-  const listeningRef = useRef(false);
-
   function stopListen() {
     listeningRef.current = false;
     setListening(false);
     procRef.current?.disconnect();
     streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
     wsRef.current?.send(JSON.stringify({ type: "listen", state: "stop" }));
     append("停止监听，已缓存近句 WAV。");
   }
@@ -164,10 +177,27 @@ export function App() {
   return (
     <div className="wrap">
       <h1>本机即灵矽</h1>
-      <div className="mac">Device-Id {id.deviceId}</div>
+      <div className="mac">
+        Device-Id {id.deviceId}{" "}
+        <button
+          type="button"
+          onClick={async () => {
+            const observer = `http://127.0.0.1:5173?deviceId=${encodeURIComponent(id.deviceId)}`;
+            try {
+              await navigator.clipboard.writeText(id.deviceId);
+              append(`已复制 Device-Id。旁观屏：${observer}`);
+            } catch {
+              append(`复制失败，请手抄 Device-Id。旁观屏：${observer}`);
+            }
+          }}
+        >
+          复制
+        </button>
+      </div>
       {ota?.activation?.code ? <div className="code">{ota.activation.code}</div> : null}
       <p className="hint">
-        1. 上报 OTA 拿到 6 位激活码 → 2. 智控台绑定到法官智能体 → 3. 检查绑定并连接 → 4. 点开始监听，允许麦克风。
+        1. 上报 OTA 拿到 6 位激活码 → 2. 智控台绑定到法官智能体 → 3. 检查绑定并连接（会向你要麦克风）→ 4. 旁观屏粘贴同一 Device-Id。
+        隧道 URL 变了要改仓库根 `.env` 的 MCP_PUBLIC_URL 并重启 `pnpm dev`。
       </p>
       <div className="status">{status}</div>
       <div className="row">
